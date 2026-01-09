@@ -1,0 +1,154 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Heart, Lock, MessageCircleHeart, Volume2, VolumeX, Sparkles, Star, Unlock } from 'lucide-react';
+
+export default function App() {
+  const [isOpen, setIsOpen] = useState(false);
+  // Forzamos el desbloqueo para la vista previa
+  const [isLocked, setIsLocked] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hearts, setHearts] = useState([]);
+  const audioRef = useRef(null);
+
+  // URL de música (Encantada)
+  const songUrl = "https://www.dropbox.com/scl/fi/vg5cykand7wirnnebwkmo/Encantada-Aqu-Video-Completo-Latino-Letra.mp3?rlkey=1jbgpse8npsosyosydoey8dqf&st=a257p50v&dl=1";
+
+  const toggleMusic = (e) => {
+    e.stopPropagation();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(err => console.error("Error:", err));
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const openLetter = () => {
+    setIsOpen(true);
+    // Intentar reproducir música al abrir
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(() => console.log("Interacción requerida para audio"));
+      }
+    }, 500);
+  };
+
+  const addHeart = (e) => {
+    const newHeart = {
+      id: Date.now(),
+      x: e.clientX,
+      y: e.clientY,
+    };
+    setHearts(prev => [...prev, newHeart]);
+    setTimeout(() => {
+      setHearts(prev => prev.filter(h => h.id !== newHeart.id));
+    }, 1500);
+  };
+
+  return (
+    <div 
+      className="min-h-screen bg-rose-50 flex flex-col items-center justify-center p-4 overflow-hidden font-serif select-none"
+      onClick={addHeart}
+    >
+      <audio ref={audioRef} src={songUrl} loop />
+
+      {/* Lluvia de corazones al tocar */}
+      {hearts.map(heart => (
+        <div
+          key={heart.id}
+          className="fixed pointer-events-none animate-ping text-rose-400 z-50"
+          style={{ left: heart.x - 16, top: heart.y - 16 }}
+        >
+          <Heart fill="currentColor" size={32} />
+        </div>
+      ))}
+
+      {/* Botón de control de música */}
+      {isOpen && (
+        <button 
+          onClick={toggleMusic}
+          className="fixed top-6 right-6 z-50 p-4 bg-white/90 backdrop-blur-md rounded-full shadow-xl text-rose-600 border border-rose-100 transition-all active:scale-90"
+        >
+          {isPlaying ? <Volume2 size={24} className="animate-pulse" /> : <VolumeX size={24} />}
+        </button>
+      )}
+
+      {!isOpen ? (
+        <div className="text-center space-y-10 animate-in fade-in zoom-in duration-1000">
+          <div className="relative inline-block">
+            <div 
+              onClick={openLetter}
+              className="p-10 rounded-full bg-white text-rose-500 cursor-pointer hover:scale-110 shadow-2xl shadow-rose-200 transition-all duration-500 animate-bounce"
+            >
+              <Unlock size={80} />
+            </div>
+            <div className="absolute -top-4 -right-4 animate-pulse">
+              <Sparkles className="text-yellow-400 w-10 h-10" />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <h1 className="text-3xl font-extrabold text-rose-800 tracking-tight">
+              ¡Tu mensaje está listo!
+            </h1>
+            <p className="text-rose-400 animate-pulse font-medium italic">
+              (Vista previa: El contador ha terminado)
+            </p>
+            <button 
+              onClick={openLetter}
+              className="bg-rose-500 text-white px-10 py-4 rounded-full font-bold shadow-lg hover:bg-rose-600 transition-all active:scale-95"
+            >
+              TOCA PARA ABRIR LA CARTA
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-md w-full animate-in fade-in slide-in-from-bottom-20 duration-1000">
+          <div className="bg-white shadow-[0_20px_50px_rgba(255,182,193,0.5)] rounded-lg p-10 relative border-t-[40px] border-rose-100 transform -rotate-1 transition-transform duration-500">
+            
+            {/* Sello decorativo */}
+            <div className="absolute -top-14 left-1/2 -translate-x-1/2">
+              <div className="bg-rose-500 p-5 rounded-full shadow-xl text-white border-4 border-white">
+                <Heart size={32} fill="currentColor" />
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-6 text-rose-900 leading-relaxed text-lg italic">
+              <p className="font-bold text-xl not-italic text-rose-800">Hola Mi Vida,</p>
+              <p>
+                Hoy finalmente es 10 de enero. Quería que este mensaje se desbloqueara 
+                justo hoy para recordarte lo mucho que significas para mí.
+              </p>
+              <p>
+                Cada segundo que pasó en ese contador valió la pena, porque no hay nada más lindo que compartir mis días contigo. Eres mi lugar seguro y mi felicidad completa.
+              </p>
+              <div className="pt-8 text-right border-t border-rose-100 mt-8">
+                <p className="font-bold text-rose-400 text-sm uppercase tracking-widest">Con todo mi cariño,</p>
+                <p className="text-4xl mt-2 font-handwriting font-medium text-rose-600">Amor 💖</p>
+              </div>
+            </div>
+
+            {/* Estrellas decorativas */}
+            <Star className="absolute top-10 right-10 text-rose-100" size={24} fill="currentColor" />
+            <Star className="absolute bottom-10 left-10 text-rose-100" size={16} fill="currentColor" />
+          </div>
+          
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="mt-8 text-rose-300 text-xs hover:text-rose-500 transition-colors uppercase tracking-widest block mx-auto"
+          >
+            Cerrar vista previa
+          </button>
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+        .font-handwriting { font-family: 'Dancing Script', cursive; }
+      `}} />
+    </div>
+  );
+}
