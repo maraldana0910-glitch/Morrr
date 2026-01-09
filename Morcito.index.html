@@ -1,154 +1,125 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Heart, Lock, MessageCircleHeart, Volume2, VolumeX, Sparkles, Star, Unlock } from 'lucide-react';
-
-export default function App() {
-  const [isOpen, setIsOpen] = useState(false);
-  // Forzamos el desbloqueo para la vista previa
-  const [isLocked, setIsLocked] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [hearts, setHearts] = useState([]);
-  const audioRef = useRef(null);
-
-  // URL de música (Encantada)
-  const songUrl = "https://www.dropbox.com/scl/fi/vg5cykand7wirnnebwkmo/Encantada-Aqu-Video-Completo-Latino-Letra.mp3?rlkey=1jbgpse8npsosyosydoey8dqf&st=a257p50v&dl=1";
-
-  const toggleMusic = (e) => {
-    e.stopPropagation();
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play().catch(err => console.error("Error:", err));
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const openLetter = () => {
-    setIsOpen(true);
-    // Intentar reproducir música al abrir
-    setTimeout(() => {
-      if (audioRef.current) {
-        audioRef.current.play()
-          .then(() => setIsPlaying(true))
-          .catch(() => console.log("Interacción requerida para audio"));
-      }
-    }, 500);
-  };
-
-  const addHeart = (e) => {
-    const newHeart = {
-      id: Date.now(),
-      x: e.clientX,
-      y: e.clientY,
-    };
-    setHearts(prev => [...prev, newHeart]);
-    setTimeout(() => {
-      setHearts(prev => prev.filter(h => h.id !== newHeart.id));
-    }, 1500);
-  };
-
-  return (
-    <div 
-      className="min-h-screen bg-rose-50 flex flex-col items-center justify-center p-4 overflow-hidden font-serif select-none"
-      onClick={addHeart}
-    >
-      <audio ref={audioRef} src={songUrl} loop />
-
-      {/* Lluvia de corazones al tocar */}
-      {hearts.map(heart => (
-        <div
-          key={heart.id}
-          className="fixed pointer-events-none animate-ping text-rose-400 z-50"
-          style={{ left: heart.x - 16, top: heart.y - 16 }}
-        >
-          <Heart fill="currentColor" size={32} />
-        </div>
-      ))}
-
-      {/* Botón de control de música */}
-      {isOpen && (
-        <button 
-          onClick={toggleMusic}
-          className="fixed top-6 right-6 z-50 p-4 bg-white/90 backdrop-blur-md rounded-full shadow-xl text-rose-600 border border-rose-100 transition-all active:scale-90"
-        >
-          {isPlaying ? <Volume2 size={24} className="animate-pulse" /> : <VolumeX size={24} />}
-        </button>
-      )}
-
-      {!isOpen ? (
-        <div className="text-center space-y-10 animate-in fade-in zoom-in duration-1000">
-          <div className="relative inline-block">
-            <div 
-              onClick={openLetter}
-              className="p-10 rounded-full bg-white text-rose-500 cursor-pointer hover:scale-110 shadow-2xl shadow-rose-200 transition-all duration-500 animate-bounce"
-            >
-              <Unlock size={80} />
-            </div>
-            <div className="absolute -top-4 -right-4 animate-pulse">
-              <Sparkles className="text-yellow-400 w-10 h-10" />
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <h1 className="text-3xl font-extrabold text-rose-800 tracking-tight">
-              ¡Tu mensaje está listo!
-            </h1>
-            <p className="text-rose-400 animate-pulse font-medium italic">
-              (Vista previa: El contador ha terminado)
-            </p>
-            <button 
-              onClick={openLetter}
-              className="bg-rose-500 text-white px-10 py-4 rounded-full font-bold shadow-lg hover:bg-rose-600 transition-all active:scale-95"
-            >
-              TOCA PARA ABRIR LA CARTA
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="max-w-md w-full animate-in fade-in slide-in-from-bottom-20 duration-1000">
-          <div className="bg-white shadow-[0_20px_50px_rgba(255,182,193,0.5)] rounded-lg p-10 relative border-t-[40px] border-rose-100 transform -rotate-1 transition-transform duration-500">
-            
-            {/* Sello decorativo */}
-            <div className="absolute -top-14 left-1/2 -translate-x-1/2">
-              <div className="bg-rose-500 p-5 rounded-full shadow-xl text-white border-4 border-white">
-                <Heart size={32} fill="currentColor" />
-              </div>
-            </div>
-
-            <div className="space-y-6 pt-6 text-rose-900 leading-relaxed text-lg italic">
-              <p className="font-bold text-xl not-italic text-rose-800">Hola Mi Vida,</p>
-              <p>
-                Hoy finalmente es 10 de enero. Quería que este mensaje se desbloqueara 
-                justo hoy para recordarte lo mucho que significas para mí.
-              </p>
-              <p>
-                Cada segundo que pasó en ese contador valió la pena, porque no hay nada más lindo que compartir mis días contigo. Eres mi lugar seguro y mi felicidad completa.
-              </p>
-              <div className="pt-8 text-right border-t border-rose-100 mt-8">
-                <p className="font-bold text-rose-400 text-sm uppercase tracking-widest">Con todo mi cariño,</p>
-                <p className="text-4xl mt-2 font-handwriting font-medium text-rose-600">Amor 💖</p>
-              </div>
-            </div>
-
-            {/* Estrellas decorativas */}
-            <Star className="absolute top-10 right-10 text-rose-100" size={24} fill="currentColor" />
-            <Star className="absolute bottom-10 left-10 text-rose-100" size={16} fill="currentColor" />
-          </div>
-          
-          <button 
-            onClick={() => setIsOpen(false)}
-            className="mt-8 text-rose-300 text-xs hover:text-rose-500 transition-colors uppercase tracking-widest block mx-auto"
-          >
-            Cerrar vista previa
-          </button>
-        </div>
-      )}
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un mensaje especial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Playfair Display', serif; 
+            background-color: #fff1f2;
+        }
         .font-handwriting { font-family: 'Dancing Script', cursive; }
-      `}} />
+        
+        @keyframes heart-float {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            animation: heart-float 1.5s ease-out forwards;
+            z-index: 100;
+        }
+        .letter-shadow {
+            box-shadow: 0 20px 50px rgba(251, 113, 133, 0.3);
+        }
+        .locked { filter: grayscale(1); opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 overflow-hidden" onclick="createHeart(event)">
+
+    <!-- Música de fondo -->
+    <!-- Añadí controls y un enlace directo para abrir/descargar si el navegador no reproduce el audio embebido -->
+    <div class="absolute top-4 left-4 z-20 text-rose-600">
+        <audio id="bgMusic" controls preload="none">
+            <source src="https://www.dropbox.com/scl/fi/vg5cykand7wirnnebwkmo/Encantada-Aqu-Video-Completo-Latino-Letra.mp3?rlkey=1jbgpse8npsosyosydoey8dqf&st=a257p50v&dl=1" type="audio/mpeg">
+            Tu navegador no soporta audio.
+        </audio>
+        <div class="mt-1">
+            <a id="audioLink" href="https://www.dropbox.com/scl/fi/vg5cykand7wirnnebwkmo/Encantada-Aqu-Video-Completo-Latino-Letra.mp3?rlkey=1jbgpse8npsosyosydoey8dqf&st=a257p50v&dl=1" target="_blank" rel="noopener" class="text-sm underline">Escuchar / descargar</a>
+        </div>
     </div>
-  );
-}
+
+    <!-- Pantalla del Candado -->
+    <div id="lockScreen" class="text-center space-y-8 transition-all duration-1000 z-10">
+        <div id="lockContainer" class="relative inline-block locked transition-all duration-500">
+            <div id="lockButton" class="bg-white p-10 rounded-full shadow-2xl text-rose-500 border-4 border-rose-100">
+                <!-- Lock SVG completo -->
+                <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="space-y-6">
+            <h1 id="mainTitle" class="text-2xl font-bold text-rose-800 tracking-tight">Este mensaje se abrirá pronto...</h1>
+            
+            <!-- Contador -->
+            <div id="countdown" class="flex justify-center gap-3 text-rose-600 font-bold">
+                <div class="bg-white/80 p-3 rounded-lg shadow-sm min-w-[60px]">
+                    <div id="days" class="text-xl">00</div>
+                    <div class="text-[10px] uppercase">Días</div>
+                </div>
+                <div class="bg-white/80 p-3 rounded-lg shadow-sm min-w-[60px]">
+                    <div id="hours" class="text-xl">00</div>
+                    <div class="text-[10px] uppercase">Horas</div>
+                </div>
+                <div class="bg-white/80 p-3 rounded-lg shadow-sm min-w-[60px]">
+                    <div id="minutes" class="text-xl">00</div>
+                    <div class="text-[10px] uppercase">Min</div>
+                </div>
+                <div class="bg-white/80 p-3 rounded-lg shadow-sm min-w-[60px]">
+                    <div id="seconds" class="text-xl">00</div>
+                    <div class="text-[10px] uppercase">Seg</div>
+                </div>
+            </div>
+            
+            <p id="instructionText" class="text-rose-400 font-medium italic">Falta muy poco para la sorpresa</p>
+        </div>
+    </div>
+
+    <!-- Carta Abierta -->
+    <div id="letterContainer" class="hidden max-w-md w-full opacity-0 transition-opacity duration-1000">
+        <div class="bg-white rounded-lg p-10 relative border-t-[40px] border-rose-200 transform -rotate-1 letter-shadow">
+            <div class="absolute -top-14 left-1/2 -translate-x-1/2">
+                <div class="bg-rose-500 p-5 rounded-full shadow-xl text-white border-4 border-white">
+                    <!-- Heart SVG completo -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 21s-7.5-4.73-10-8.05C-0.5 8.56 2.24 3 7 3c1.99 0 3.33 1.06 5 3 1.67-1.94 3.01-3 5-3 4.76 0 7.5 5.56 5 9.95C19.5 16.27 12 21 12 21z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="space-y-6 pt-6 text-rose-900 leading-relaxed text-lg italic">
+                <p class="font-bold text-xl not-italic text-rose-800">Hola Mi Vida,</p>
+                <p>Hoy finalmente es 10 de enero. Quería que este mensaje se desbloqueara justo hoy para recordarte lo mucho que significas para mí.</p>
+                <p>Cada segundo valió la pena, porque no hay nada más lindo que compartir mis días contigo. Eres mi lugar seguro y mi felicidad completa.</p>
+                <div class="pt-8 text-right border-t border-rose-100 mt-8">
+                    <p class="font-bold text-rose-400 text-sm uppercase tracking-widest">Con todo mi cariño,</p>
+                    <p class="text-4xl mt-2 font-handwriting text-rose-600">Amor 💖</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const targetDate = new Date('January 10, 2026 00:00:00').getTime();
+        let isReady = false;
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                isReady = true;
+                document.getElementById('lockContainer').classList.remove('locked');
+                document.getElementById('lockButton').classList.add('animate-bounce', 'cursor-pointer');
+                document.getElementById('lockButton').onclick = openLetter;
+                document.getElementById('mainTitle').innerText = "¡Llegó el momento!";
+                document.getElementById('instructionText').innerText = "Toca el candado para abrir tu mensaje";
+                document.getElementById('countdown').style.display = 'none';
+                // Cambiar icono a "abierto" (actualiza el contenido interno del svg)
+                document.getElementById('lockIcon').innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M
